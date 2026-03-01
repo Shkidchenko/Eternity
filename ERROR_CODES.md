@@ -1,0 +1,11 @@
+# Error Codes
+- 0 None
+- 1000 ValidationFailed
+- 1001 Timeout
+- 1002 DeviceNotFound
+- 1003 ToolExecutionFailed
+- 2000 UnsupportedPackage
+- 2001 IntegrityCheckFailed
+- 3000 FlashStepFailed
+- 4000 PluginLoadFailed
+- 4001 UnauthorizedOperation

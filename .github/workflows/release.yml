@@ -1,0 +1,69 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build-test-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Eternity.sln
+
+      - name: Build (Release)
+        run: dotnet build Eternity.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Eternity.sln -c Release --no-build
+
+      - name: Download official Android platform-tools
+        run: |
+          curl -L -o platform-tools.zip https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+          curl -L -o platform-tools.zip.sha256 https://dl.google.com/android/repository/platform-tools-latest-linux.zip.sha256
+          echo "$(cat platform-tools.zip.sha256)  platform-tools.zip" | sha256sum -c -
+
+      - name: Publish Linux portable
+        run: dotnet publish src/Eternity.App/Eternity.App.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/linux
+
+      - name: Publish Windows portable
+        run: dotnet publish src/Eternity.App/Eternity.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win
+
+      - name: Package artifacts
+        run: |
+          tar -czf Eternity-linux-x64.tar.gz -C artifacts linux
+          zip -r Eternity-win-x64.zip artifacts/win
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eternity-packages
+          path: |
+            Eternity-linux-x64.tar.gz
+            Eternity-win-x64.zip
+
+      - name: Generate release notes body
+        run: |
+          echo "## Changelog" > release_notes.md
+          sed -n '/## \[Unreleased\]/,$p' CHANGELOG.md >> release_notes.md
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          files: |
+            Eternity-linux-x64.tar.gz
+            Eternity-win-x64.zip

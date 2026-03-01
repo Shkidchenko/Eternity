@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Eternity.Core/Eternity.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Eternity.Plugins.Abstractions/Eternity.Plugins.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

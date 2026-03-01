@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Eternity.App.Controls"
+        x:Class="Eternity.App.Views.MainWindow"
+        Width="1200" Height="800" Title="Eternity">
+  <Grid>
+    <controls:RainbowBackgroundControl IsAnimationEnabled="True" />
+    <Grid RowDefinitions="Auto,*">
+      <StackPanel Orientation="Horizontal" Margin="12" Spacing="8">
+        <TextBlock Text="Eternity" FontSize="24" FontWeight="Bold"/>
+        <ToggleSwitch Content="深色模式" IsChecked="{Binding IsDarkTheme}"/>
+        <Button Content="刷新设备" Command="{Binding RefreshDevicesCommand}"/>
+        <Button Content="开始刷机（双确认）" Command="{Binding StartFlashCommand}"/>
+      </StackPanel>
+      <Grid Grid.Row="1" ColumnDefinitions="2*,2*,2*" Margin="12" ColumnSpacing="8">
+        <GroupBox Header="设备列表">
+          <ListBox ItemsSource="{Binding Devices}"/>
+        </GroupBox>
+        <GroupBox Header="刷机包管理" Grid.Column="1">
+          <StackPanel Spacing="6">
+            <TextBox Watermark="输入 zip/tar 文件路径" Text="{Binding PackagePath}"/>
+            <Button Content="解析与校验" Command="{Binding ParsePackageCommand}"/>
+            <ListBox ItemsSource="{Binding Images}" Height="180"/>
+            <TextBlock Text="分区映射编辑器：支持拖放映射（当前示例为列表编辑）"/>
+          </StackPanel>
+        </GroupBox>
+        <GroupBox Header="日志/进度/About" Grid.Column="2">
+          <StackPanel Spacing="6">
+            <ProgressBar Minimum="0" Maximum="100" Value="60"/>
+            <TextBlock Text="步骤 ETA：00:20"/>
+            <ItemsControl ItemsSource="{Binding Logs}" Height="220"/>
+            <TextBlock Text="{Binding Author}"/>
+            <TextBlock><Hyperlink NavigateUri="{Binding AuthorLink}">Shkidchenko GitHub</Hyperlink></TextBlock>
+          </StackPanel>
+        </GroupBox>
+      </Grid>
+    </Grid>
+  </Grid>
+</Window>
