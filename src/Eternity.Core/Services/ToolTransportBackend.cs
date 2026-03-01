@@ -44,9 +44,11 @@ public sealed class ToolTransportBackend : ITransportBackend
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
+            Process? process = null;
             try
             {
-                var psi = new ProcessStartInfo(tool, arguments)
+                var scopedArguments = BuildScopedArguments(tool, arguments, deviceId);
+                var psi = new ProcessStartInfo(tool, scopedArguments)
                 {
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -54,7 +56,7 @@ public sealed class ToolTransportBackend : ITransportBackend
                     CreateNoWindow = true
                 };
 
-                using var process = Process.Start(psi);
+                process = Process.Start(psi);
                 if (process is null)
                 {
                     return Result<string>.Fail(new OperationError(ErrorCode.ToolExecutionFailed, $"Cannot start {tool}", "transport", deviceId));
@@ -76,6 +78,8 @@ public sealed class ToolTransportBackend : ITransportBackend
             }
             catch (OperationCanceledException)
             {
+                TryTerminateProcess(process);
+
                 if (attempt == retries)
                 {
                     return Result<string>.Fail(new OperationError(ErrorCode.Timeout, $"{tool} timed out", "transport", deviceId));
@@ -83,14 +87,53 @@ public sealed class ToolTransportBackend : ITransportBackend
             }
             catch (Exception ex)
             {
+                TryTerminateProcess(process);
+
                 if (attempt == retries)
                 {
                     return Result<string>.Fail(new OperationError(ErrorCode.ToolExecutionFailed, ex.Message, "transport", deviceId));
                 }
             }
+            finally
+            {
+                process?.Dispose();
+            }
         }
 
         return Result<string>.Fail(new OperationError(ErrorCode.ToolExecutionFailed, "Unknown failure", "transport", deviceId));
+    }
+
+    private static string BuildScopedArguments(string tool, string arguments, string? deviceId)
+    {
+        if (string.IsNullOrWhiteSpace(deviceId) || !IsDeviceScopedTool(tool))
+        {
+            return arguments;
+        }
+
+        var escapedDeviceId = deviceId.Replace("\"", "\\\"");
+        return $"-s \"{escapedDeviceId}\" {arguments}".Trim();
+    }
+
+    private static bool IsDeviceScopedTool(string tool)
+        => string.Equals(tool, "adb", StringComparison.OrdinalIgnoreCase)
+           || string.Equals(tool, "fastboot", StringComparison.OrdinalIgnoreCase);
+
+    private static void TryTerminateProcess(Process? process)
+    {
+        if (process is null || process.HasExited)
+        {
+            return;
+        }
+
+        try
+        {
+            process.Kill(entireProcessTree: true);
+            process.WaitForExit();
+        }
+        catch
+        {
+            // Swallow process termination failures and allow retry/error handling to continue.
+        }
     }
 
     private static IEnumerable<DeviceInfo> ParseDeviceList(string data, DeviceMode mode)
