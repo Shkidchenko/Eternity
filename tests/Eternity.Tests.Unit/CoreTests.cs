@@ -27,6 +27,15 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void Welcome_CorruptState_Shows()
+    {
+        var path = Path.GetTempFileName();
+        File.WriteAllText(path, "{not-json");
+        var svc = new WelcomeStateService(path);
+        Assert.True(svc.ShouldShowWelcome());
+    }
+
+    [Fact]
     public async Task MockBackend_Rejects_InvalidTimeout()
     {
         var backend = new MockTransportBackend();

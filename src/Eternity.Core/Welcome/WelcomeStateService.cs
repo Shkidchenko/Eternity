@@ -17,8 +17,23 @@ public sealed class WelcomeStateService
     public bool ShouldShowWelcome()
     {
         if (!File.Exists(_path)) return true;
-        var state = JsonSerializer.Deserialize<WelcomeState>(File.ReadAllText(_path));
-        return state?.Accepted != true;
+        try
+        {
+            var state = JsonSerializer.Deserialize<WelcomeState>(File.ReadAllText(_path));
+            return state?.Accepted != true;
+        }
+        catch (JsonException)
+        {
+            return true;
+        }
+        catch (IOException)
+        {
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return true;
+        }
     }
 
     /// <summary>Marks welcome accepted.</summary>
