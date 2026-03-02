@@ -25,7 +25,9 @@ public sealed class PackageParser
 
         var images = new List<ImageEntry>();
         var warnings = new List<string>();
-        using var archive = ext == ".zip" ? ZipArchive.Open(filePath) : TarArchive.Open(filePath);
+        using IArchive archive = ext == ".zip"
+            ? ZipArchive.Open(filePath)
+            : TarArchive.Open(filePath);
         foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
         {
             cancellationToken.ThrowIfCancellationRequested();
