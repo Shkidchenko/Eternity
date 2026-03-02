@@ -1,4 +1,5 @@
-using Avalonia.Controls;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Eternity.App.Views;
@@ -22,11 +23,20 @@ public partial class WelcomeViewModel : ObservableObject
 
     /// <summary>Accepts disclaimer and navigates to main window.</summary>
     [RelayCommand]
-    public void Start(Window window)
+    public void Start()
     {
         _service.AcceptWelcome();
+
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            return;
+        }
+
         var main = new MainWindow { DataContext = new MainViewModel() };
+        desktop.MainWindow = main;
         main.Show();
-        window.Close();
+
+        var welcome = desktop.Windows.FirstOrDefault(w => w is WelcomeWindow);
+        welcome?.Close();
     }
 }

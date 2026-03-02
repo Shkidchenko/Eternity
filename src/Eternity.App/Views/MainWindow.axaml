@@ -1,7 +1,9 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:Eternity.App.Controls"
+        xmlns:vm="using:Eternity.App.ViewModels"
         x:Class="Eternity.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
         Width="1200" Height="800" Title="Eternity">
   <Grid>
     <controls:RainbowBackgroundControl IsAnimationEnabled="True" />
@@ -30,7 +32,7 @@
             <TextBlock Text="步骤 ETA：00:20"/>
             <ItemsControl ItemsSource="{Binding Logs}" Height="220"/>
             <TextBlock Text="{Binding Author}"/>
-            <TextBlock><Hyperlink NavigateUri="{Binding AuthorLink}">Shkidchenko GitHub</Hyperlink></TextBlock>
+            <TextBlock Text="{Binding AuthorLink}"/>
           </StackPanel>
         </GroupBox>
       </Grid>

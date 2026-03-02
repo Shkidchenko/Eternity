@@ -1,13 +1,15 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Eternity.App.ViewModels"
         x:Class="Eternity.App.Views.WelcomeWindow"
+        x:DataType="vm:WelcomeViewModel"
         Width="720" Height="420" CanResize="False" Title="Welcome to Eternity">
   <Border CornerRadius="24" Margin="20" Background="#88222233" Padding="24">
     <StackPanel Spacing="14" VerticalAlignment="Center">
       <TextBlock Text="Eternity" FontSize="42" FontWeight="SemiBold" HorizontalAlignment="Center"/>
       <TextBlock Text="PC 端可视化安卓刷机工具" HorizontalAlignment="Center"/>
       <TextBlock Text="软件仅用于合法设备维护；使用者自担风险；开发者不承担设备损坏责任。" TextWrapping="Wrap"/>
-      <Button Content="开始使用" HorizontalAlignment="Center" Width="180" Height="44" Command="{Binding StartCommand}" CommandParameter="{Binding $parent[Window]}"/>
+      <Button Content="开始使用" HorizontalAlignment="Center" Width="180" Height="44" Command="{Binding StartCommand}"/>
     </StackPanel>
   </Border>
 </Window>
